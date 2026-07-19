@@ -8,29 +8,25 @@ export function orderByProps(obj, order) {
     throw new TypeError('Второй аргумент должен быть массивом');
   }
 
+  // Получаем только собственные перечисляемые свойства (игнорируем прототип)
+  const ownKeys = Object.keys(obj);
+
+  // Разделяем ключи на две группы: те, что в order, и остальные
   const orderedKeys = [];
   const remainingKeys = [];
 
-  // Сначала собираем ключи из order, которые есть в объекте
+  // Сначала добавляем ключи из order, если они есть в объекте и ещё не добавлены
   for (const key of order) {
-    if (typeof key === 'string' && Object.prototype.hasOwnProperty.call(obj, key)) {
+    if (typeof key === 'string' && ownKeys.includes(key)) {
       orderedKeys.push(key);
     }
   }
 
-  // Перебираем все собственные перечисляемые свойства объекта через for-in
-  for (const key in obj) {
-    // Проверяем, что свойство принадлежит самому объекту (не из прототипа)
-    if (!Object.prototype.hasOwnProperty.call(obj, key)) {
-      continue;
+  // Остальные ключи, которых не было в order
+  for (const key of ownKeys) {
+    if (!orderedKeys.includes(key)) {
+      remainingKeys.push(key);
     }
-
-    // Если ключ уже есть в orderedKeys — пропускаем (чтобы не дублировать)
-    if (orderedKeys.includes(key)) {
-      continue;
-    }
-
-    remainingKeys.push(key);
   }
 
   // Сортируем оставшиеся ключи по алфавиту
